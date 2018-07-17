@@ -15,7 +15,9 @@ import os
 import numpy as np
 from scipy import interpolate
 
-from datetime import datetime
+import collections
+import datetime
+import numbers
 
 import pdb
 import warnings
@@ -30,14 +32,36 @@ otis_constits = { 'M2':{'index':1,'omega':1.405189e-04,'v0u':1.731557546},\
      'Q1':{'index':8,'omega':6.495854e-05,'v0u':5.877717569}}
 
 
+def _preprocess_time(time):
+	"""
+	See if we can massage time to be something useful
+	"""
+	print(time, type(time))
+	if not isinstance(time, collections.Iterable):
+		time = [time]
+	if isinstance(time[0], np.datetime64):
+		return time
+	if isinstance(time[0], datetime.datetime):
+		return np.array([np.datetime64(d) for d in time])
+	if isinstance(time[0], numbers.Number):
+		return np.array([np.datetime64(datetime.datetime.fromordinal(d))
+							for d in time])
+	raise TypeError('time must be np.datetime64, '
+				    'list of datetime objects, or ordinal floats')
+
 def tide_pred(modfile, lon, lat, time, z=None,conlist=None):
 	"""
-	Performs a tidal prediction at all points in [lon,lat] at times in vector [time]
-	time is numpy datetime64.
+	Performs a tidal prediction at all points in [lon,lat] at times.
+
+
+	time is numpy datetime64 or a list of datetime objects.
 	"""
 
+	time = _preprocess_time(time)
+
 	# Read and interpolate the constituents
-	u_re, u_im, v_re, v_im, h_re, h_im, omega, conlist = extract_HC(modfile,lon,lat,z=z,conlist=conlist)
+	u_re, u_im, v_re, v_im, h_re, h_im, omega, conlist = extract_HC(modfile,
+					lon, lat, z=z, conlist=conlist)
 
 	# Initialise the output arrays
 	sz = lon.shape
@@ -70,7 +94,7 @@ def tide_pred(modfile, lon, lat, time, z=None,conlist=None):
 	# Calculate the time series
 	tsec = (time.astype('datetime64[s]') -
 			np.datetime64('1992-01-01', 's')).astype(float)
-	
+
 	h=np.zeros((nt,nx))
 	u=np.zeros((nt,nx))
 	v=np.zeros((nt,nx))
