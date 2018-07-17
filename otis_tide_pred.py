@@ -70,8 +70,7 @@ def tide_pred(modfile, lon, lat, time, z=None,conlist=None):
 	# Calculate the time series
 	tsec = (time.astype('datetime64[s]') -
 			np.datetime64('1992-01-01', 's')).astype(float)
-	print('tsec!', tsec)
-
+	
 	h=np.zeros((nt,nx))
 	u=np.zeros((nt,nx))
 	v=np.zeros((nt,nx))
@@ -539,9 +538,7 @@ def nodal(time,con):
 	pu = np.zeros((ncon,1))
 	pf = np.ones((ncon,1))
 	v0u = np.zeros((ncon,1))
-	print(ndict)
 	for ii,vv in enumerate(con):
-		print(vv)
 		if vv in ndict:
 			pu[ii,:] = ndict[vv]['u']*rad
 			pf[ii,:] = ndict[vv]['f']
