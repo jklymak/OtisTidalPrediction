@@ -49,19 +49,55 @@ def _preprocess_time(time):
 	raise TypeError('time must be np.datetime64, '
 				    'list of datetime objects, or ordinal floats')
 
-def tide_pred(modfile, lon, lat, time, z=None,conlist=None):
+def tide_pred(modfile, lon, lat, time, conlist=None):
 	"""
 	Performs a tidal prediction at all points in [lon,lat] at times.
 
+	Parameters
+	----------
+	modfile : string
+		(Relative) path of the OSU model file on your file system
+	lon, lat : array-like
+		each is an n-length array of longitude and latitudes in units of
+		degrees to perform predictions at. Usually a numpy array, though a
+		list will work.  lat ranges from -90 to 90.  lon can range
+		from -180 to 360.
+  	time : array-like
+		m-length array of times.  Acceptable formats are a list of `datetime`
+		objects, a list or array of `numpy.datetime64` objects, or
+		a list of floats, in which case they are assumed to be ordinal
+		dates (See `.datetime.datetime.fromordinal`).
+	conlist : list of strings (optional)
+		If supplied, gives a list of tidal constituents to include in
+		prediction. Available are 'M2', 'S2', 'N2', 'K2', 'K1', 'O1', 'P1',
+		and 'Q1'.
 
-	time is numpy datetime64 or a list of datetime objects.
+	Returns
+	-------
+	h : m-by-n numpy array of tidal heights
+		height is in meters, times are along the rows, and positions along
+		the columns
+	u : m-by-n numpy array of east-west tidal velocity [m/s]
+	v : m-by-n numpy array of north tidal velocity [m/s]
+
+	Examples
+	--------
+
+	dates = np.arange(np.datetime64('2001-04-03'),
+	                  np.datetime64('2001-05-03'), dtype='datetime64[h]' )
+
+	lon = np.array([198, 199])
+	lat = np.array([21, 19])
+
+	h, u, v = otp.tide_pred(modfile, lon, lat, dates,conlist=None)
+
 	"""
 
 	time = _preprocess_time(time)
 
 	# Read and interpolate the constituents
 	u_re, u_im, v_re, v_im, h_re, h_im, omega, conlist = extract_HC(modfile,
-					lon, lat, z=z, conlist=conlist)
+					lon, lat, conlist=conlist)
 
 	# Initialise the output arrays
 	sz = lon.shape
@@ -148,11 +184,7 @@ def extract_HC(modfile, lon, lat, z=None, conlist=None):
 	mask = mask == 1
 	def interpit(Z, lon, lat):
 		spl = interpolate.RectBivariateSpline(X[0, :], Y[:, 0], Z.T)
-		z = 0 * lon
-		for i in range(len(lon)):
-			z[i] = spl(lon[i], lat[i])
-		return z
-
+		return spl(lon, lat, grid=False)
 
 	# Create an interpolation object
 	sz = lon.shape

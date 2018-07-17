@@ -15,7 +15,7 @@ lon = np.array([198, 199, ])
 lat = np.array([21, 19])
 
 dates = np.array([datetime.datetime.toordinal(d) for d in dates])
-h, u, v = otp.tide_pred(modfile, lon, lat, dates, z=None,conlist=None)
+h, u, v = otp.tide_pred(modfile, lon, lat, dates,conlist=None)
 
 
 # test datetime dates
@@ -25,7 +25,7 @@ dates = [datetime.datetime(2001, 4, 3),
 lon = np.array([198, 199, ])
 lat = np.array([21, 19])
 
-h, u, v = otp.tide_pred(modfile, lon, lat, dates, z=None,conlist=None)
+h, u, v = otp.tide_pred(modfile, lon, lat, dates,conlist=None)
 
 # test numpy datetime64 dates
 dates = np.arange(np.datetime64('2001-04-03'),
@@ -34,4 +34,9 @@ dates = np.arange(np.datetime64('2001-04-03'),
 lon = np.array([198, 199, ])
 lat = np.array([21, 19])
 
-h, u, v = otp.tide_pred(modfile, lon, lat, dates, z=None,conlist=None)
+h, u, v = otp.tide_pred(modfile, lon, lat, dates,conlist=None)
+
+print(np.shape(h))
+fig, ax = plt.subplots()
+ax.plot(dates, u, dates, v)
+plt.show()
