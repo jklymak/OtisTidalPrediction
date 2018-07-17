@@ -3,6 +3,7 @@
 Gary Egbert's group at Oregon State University produce  inversions of
 open-ocean tidal signals to give predictions of ocean tides.  There are
 a variety of solutions available at http://volkov.oce.orst.edu/tides/otps.html
+For this package, download the binary, non-netcdf, version of the predictions.  
 
 This software is based on a chain of software to decode these files.  The
 files themselves are straightforward, but to get accurate tidal predictions
